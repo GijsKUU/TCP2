@@ -27,35 +27,35 @@ data Token
 
 -- Exercise 2 
 -- "A program is a sequence of rules"
--- "This needs to be turned into a real abstract language"
+data Program = Program [Rule] deriving Show
 
-data Program = Program deriving Show
-
-{-
-data Program = [Rule] deriving Show
-
-data Rule = Func -> Cmds
-
-data Cmds = Cmd | Cmd ("," Cmd) 
+type Func = String 
 
 data Cmd 
-    = Go
-    | Take
-    | Mark
-    | Nothing_
-    | Turn Dir 
-    | Case Dir Of Alts End
-    | Func
+    = GoCmd
+    | TakeCmd
+    | MarkCmd
+    | NothingCmd
+    | TurnCmd Dir
+    | CaseOfCmd Dir Alt
+
+data Dir = DirLeft | DirRight | DirFront deriving Show
+
+data Rule = Rule Func [Cmd]
+
+data Pat
+    = EmptyPat
+    | LabmdaPat
+    | DebrisPat
+    | AsteroidPat
+    | BoundaryPat
+    | UnderscorePat
+    deriving (Show, Eq)
+
+data Alt = Alt Pat [Cmd]
 
 
-data Dir = Dir Left | Dir Right | Dir Front
 
-data Alts = Alt | Alt (";" Alt)
 
-data Alt = Pattern -> Cmds
-
-data Pattern = Empty | Lambda | Debris | Asteroid | Boundary | _
-
--}
 
 
