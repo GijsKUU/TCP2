@@ -13,16 +13,26 @@ $plusorminus = [\+\-]
 
 
 tokens :-
-  [$alpha $beta $digit $plusorminus]+ $white+ "->"             { \s -> Identifier (Ident  s) } -- hier blijft de whitespace tussen de identifier en de '->' wel bewaard
-  $white+                        ; 
-  "--".*                         ;
-  case                           { \s -> Case }
-  of                             { \s -> Of }
-  end                            { \s -> End }
-  [\.\,]                         { \s -> Sym (head s) }
-  $alpha+                        { \s -> Cmd s}
-  $beta [$alpha]+                { \s -> Pattern s}
-  \_                             { \s -> Pattern "_"}
+  $white+                                   ; 
+  "--".*                                    ; 
+  "->"                                      {\s -> SymArrow}                                     
+  "case"                                    { \s -> Case }
+  "of"                                      { \s -> Of }
+  "end"                                     { \s -> End }
+  "left"                                    {\s -> Dir s}
+  "right"                                   {\s -> Dir s}
+  "front"                                   {\s -> Dir s}
+  "go"                                      {\s -> Go }
+  "take"                                    {\s -> Take}
+  "mark"                                    {\s -> Mark}
+  "nothing"                                 {\s -> Nothing_}
+  "turn"                                    {\s -> Turn}
+  ";"                                       {\s -> NextC}
+  [\.\,]                                    { \s -> Sym (head s) }
+  $beta [$alpha]+                           { \s -> Pattern s} 
+  \_                                        { \s -> Pattern "_"}
+  [$alpha $beta $digit $plusorminus]+       { \s -> Func s } 
+
 
 
 
