@@ -27,12 +27,12 @@ main = do
   putStrLn "Tokens - test 1 :"
   putStrLn ""
   print tokens
-  let tokens = alexScanTokens chars
-  putStrLn "Tokens:"
-  putStrLn ""
-  print tokens
-  -- let arr = parser tokens
-  -- putStrLn "Parsed program:"
+  -- let tokens = alexScanTokens chars
+  -- putStrLn "Tokens:"
   -- putStrLn ""
-  -- print arr
+  -- print tokens
+  let arr = parser tokens
+  putStrLn "Parsed program:"
+  putStrLn ""
+  print arr
 

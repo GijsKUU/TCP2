@@ -15,23 +15,23 @@ $plusorminus = [\+\-]
 tokens :-
   $white+                                   ; 
   "--".*                                    ; 
-  "->"                                      {\s -> SymArrow}                                     
-  "case"                                    { \s -> Case }
-  "of"                                      { \s -> Of }
-  "end"                                     { \s -> End }
-  "left"                                    {\s -> Dir s}
-  "right"                                   {\s -> Dir s}
-  "front"                                   {\s -> Dir s}
-  "go"                                      {\s -> Go }
-  "take"                                    {\s -> Take}
-  "mark"                                    {\s -> Mark}
-  "nothing"                                 {\s -> Nothing_}
-  "turn"                                    {\s -> Turn}
-  ";"                                       {\s -> NextC}
-  [\.\,]                                    { \s -> Sym (head s) }
-  $beta [$alpha]+                           { \s -> Pattern s} 
-  \_                                        { \s -> Pattern "_"}
-  [$alpha $beta $digit $plusorminus]+       { \s -> Func s } 
+  "->"                                      {\s -> TokenSymArrow}                                     
+  "case"                                    { \s -> TokenCase }
+  "of"                                      { \s -> TokenOf }
+  "end"                                     { \s -> TokenEnd }
+  "left"                                    {\s -> TokenDir s}
+  "right"                                   {\s -> TokenDir s}
+  "front"                                   {\s -> TokenDir s}
+  "go"                                      {\s -> TokenGo }
+  "take"                                    {\s -> TokenTake}
+  "mark"                                    {\s -> TokenMark}
+  "nothing"                                 {\s -> TokenNothing_}
+  "turn"                                    {\s -> TokenTurn}
+  ";"                                       {\s -> TokenNextC}
+  [\.\,]                                    { \s -> TokenSym (head s) }
+  $beta [$alpha]+                           { \s -> TokenPattern s} 
+  \_                                        { \s -> TokenPattern "_"}
+  [$alpha $beta $digit $plusorminus]+       { \s -> TokenFunc s } 
 
 
 

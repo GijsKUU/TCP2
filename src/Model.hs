@@ -2,21 +2,21 @@ module Model where
 
 -- Exercise 1
 data Token 
-    = Case
-    | Of
-    | End
-    | Sym Char -- symbols: '.' & ','
-    | SymArrow
-    | Go
-    | Take
-    | Mark
-    | Nothing_
-    | Turn
+    = TokenCase
+    | TokenOf
+    | TokenEnd
+    | TokenSym Char -- symbols: '.' & ','
+    | TokenSymArrow
+    | TokenGo
+    | TokenTake
+    | TokenMark
+    | TokenNothing_
+    | TokenTurn
     | Token -- placeholder
-    | NextC
-    | Pattern String -- Empty | Lambda | Debris | Asteroid | Boundary | _
-    | Dir String
-    | Func String -- function names
+    | TokenNextC -- ';'
+    | TokenPattern String -- Empty | Lambda | Debris | Asteroid | Boundary | _
+    | TokenDir String
+    | TokenFunc String -- function names
     deriving Show
 
 
@@ -29,7 +29,9 @@ data Token
 -- "A program is a sequence of rules"
 data Program = Program [Rule] deriving Show
 
-type Func = String 
+data Rule = Rule Func [Cmd] deriving Show
+
+newtype Func = Functype String deriving Show
 
 data Cmd 
     = GoCmd
@@ -38,21 +40,21 @@ data Cmd
     | NothingCmd
     | TurnCmd Dir
     | CaseOfCmd Dir Alt
+    deriving Show
 
 data Dir = DirLeft | DirRight | DirFront deriving Show
 
-data Rule = Rule Func [Cmd]
+data Alt = Alt Pat [Cmd] deriving Show
 
 data Pat
     = EmptyPat
-    | LabmdaPat
+    | LambdaPat
     | DebrisPat
     | AsteroidPat
     | BoundaryPat
     | UnderscorePat
     deriving (Show, Eq)
 
-data Alt = Alt Pat [Cmd]
 
 
 
