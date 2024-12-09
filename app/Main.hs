@@ -18,19 +18,19 @@ batch = undefined
 -- and write a new main function.
 main :: IO ()
 main = do
-  chars <- readFile "examples/RemoveDebris.arrow"
+  chars <- readFile "examples/Add.arrow"
   putStrLn "Input program:"
   putStrLn ""
   putStrLn chars
   putStrLn ""
-  let tokens = alexScanTokens "Asteroid -> goOn;"
-  putStrLn "Tokens - test 1 :"
-  putStrLn ""
-  print tokens
-  -- let tokens = alexScanTokens chars
-  -- putStrLn "Tokens:"
+  -- let tokens = alexScanTokens "turnAround  -> turn right, turn right."
+  -- putStrLn "Tokens - test 1 :"
   -- putStrLn ""
   -- print tokens
+  let tokens = alexScanTokens chars
+  putStrLn "Tokens:"
+  putStrLn ""
+  print tokens
   let arr = parser tokens
   putStrLn "Parsed program:"
   putStrLn ""

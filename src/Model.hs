@@ -33,13 +33,16 @@ data Rule = Rule Func [Cmd] deriving Show
 
 newtype Func = Functype String deriving Show
 
+newtype SymArrow = ArrowType Token deriving Show
+
 data Cmd 
     = GoCmd
     | TakeCmd
     | MarkCmd
     | NothingCmd
     | TurnCmd Dir
-    | CaseOfCmd Dir Alt
+    | CaseOfCmd Dir [Alt]
+    | FuncCmd Func
     deriving Show
 
 data Dir = DirLeft | DirRight | DirFront deriving Show

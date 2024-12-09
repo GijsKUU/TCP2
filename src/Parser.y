@@ -42,10 +42,14 @@ Program : Rule {[$1]}
 
 
 Rule :: { Rule } 
-Rule : Func CmdList { Rule $1 $2 }
+Rule : Func SymArrow CmdList '.'{ Rule $1 $3 }
+
 
 Func :: { Func}
 Func : func { Functype $1}
+
+SymArrow :: {SymArrow}
+SymArrow : '->' {ArrowType $1}
 
 
 Cmd :: { Cmd }
@@ -54,11 +58,13 @@ Cmd : go            {GoCmd}
     | mark          {MarkCmd}
     | nothing       {NothingCmd}
     | turn Dir      {TurnCmd $2}
-    | case Dir Alt  {CaseOfCmd $2 $3}
+    | case Dir of AltList end  {CaseOfCmd $2 $4}
+    | func          {FuncCmd (Functype $1)}
 
+  
 CmdList :: {[Cmd]}
 CmdList : Cmd {[$1]}
-        | Cmd CmdList { $1 : $2 }
+        | Cmd ',' CmdList { $1 : $3 }
 
 
 Dir :: {Dir}
@@ -73,10 +79,18 @@ Pat : Empty     {EmptyPat}
     | Debris    {DebrisPat}
     | Asteroid  {AsteroidPat}
     | Boundary  {BoundaryPat}
-    | '_'         {UnderscorePat}
+    | '_'       {UnderscorePat}
+
+
+
+
+AltList :: {[Alt]}
+AltList : Alt {[$1]}
+        | Alt ';' AltList { $1 : $3 }
 
 Alt :: {Alt}
-Alt : Pat CmdList { Alt $1 $2 }
+Alt : Pat SymArrow CmdList { Alt $1 $3 }
+
 
 
 
