@@ -7,6 +7,7 @@ import qualified Data.Set as Set
 
 
 -- Exercise 5
+
 -- pr :: Program, r :: Rule, c :: Cmd
 data Algebra pr r c = Algebra {
     prF :: [r] -> pr, -- Program
@@ -18,10 +19,8 @@ fold (Algebra mapPr mapR mapC) = foldProgram
     where
         foldProgram (Program rules) = mapPr (map foldRule rules)
         -- map the foldRule on the [Rule]('rules') in Program
-
-        foldRule (Rule f cs) = mapR f (map foldCmd cs)
-        -- map foldCmd on [Cmd] and do mapR
-
+        foldRule (Rule func cmds) = mapR func (map foldCmd cmds)
+        -- map foldCmd on the commands in Rule
         foldCmd _ = mapC 
         -- do mapC
 

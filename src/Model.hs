@@ -5,7 +5,8 @@ data Token
     = TokenCase
     | TokenOf
     | TokenEnd
-    | TokenSym Char -- symbols: '.' & ','
+    | TokenComma
+    | TokenPeriod 
     | TokenSymArrow
     | TokenGo
     | TokenTake
@@ -14,8 +15,15 @@ data Token
     | TokenTurn
     | Token -- placeholder
     | TokenNextC -- ';'
-    | TokenPattern String -- Empty | Lambda | Debris | Asteroid | Boundary | _
-    | TokenDir String
+    | TokenEmptyPat
+    | TokenLambdaPat
+    | TokenDebrisPat 
+    | TokenAsteroidPat
+    | TokenBoundaryPat
+    | TokenUnderscorePat 
+    | TokenLeft
+    | TokenRight
+    | TokenFront
     | TokenFunc String -- function names
     deriving Show
 
@@ -56,7 +64,7 @@ data Pat
     | AsteroidPat
     | BoundaryPat
     | UnderscorePat
-    deriving (Show, Eq)
+    deriving (Ord, Show, Eq)
 
 
 

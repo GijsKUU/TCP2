@@ -18,15 +18,15 @@ batch = undefined
 -- and write a new main function.
 main :: IO ()
 main = do
-  chars <- readFile "examples/Add.arrow"
+  chars <- readFile "examples/Test.arrow"
   putStrLn "Input program:"
   putStrLn ""
   putStrLn chars
   putStrLn ""
-  -- let tokens = alexScanTokens "turnAround  -> turn right, turn right."
-  -- putStrLn "Tokens - test 1 :"
-  -- putStrLn ""
-  -- print tokens
+  --let tokens = alexScanTokens "turnAround  -> turn right, turn left."
+  --putStrLn "Tokens - test 1 :"
+  --putStrLn ""
+  --print tokens
   let tokens = alexScanTokens chars
   putStrLn "Tokens:"
   putStrLn ""
@@ -36,3 +36,21 @@ main = do
   putStrLn ""
   print arr
 
+  -- Validate the parsed program using the checks
+  putStrLn "Validation results:"
+  validateProgram (Program arr)
+
+
+
+-- Validation function to check all conditions
+validateProgram :: Program -> IO ()
+validateProgram prog = do
+  putStrLn $ "Has start command? " ++ show (checkStartCmd prog)
+  putStrLn $ "Are all rule calls valid? " ++ show (checkRuleCalls prog)
+  putStrLn $ "Program has no duplicate rule definitions? " ++ show (checkDoubleDefined prog)
+  putStrLn $ "Are all patterns matched? " ++ show (checkPatMatches (getRules prog))
+  putStrLn $ "So is this program valid? " ++ show (checkProgram prog)
+
+-- Helper to extract the list of rules from a program
+getRules :: Program -> [Rule]
+getRules (Program rules) = rules

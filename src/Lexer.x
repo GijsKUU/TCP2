@@ -19,18 +19,23 @@ tokens :-
   "case"                                    { \s -> TokenCase }
   "of"                                      { \s -> TokenOf }
   "end"                                     { \s -> TokenEnd }
-  "left"                                    {\s -> TokenDir s}
-  "right"                                   {\s -> TokenDir s}
-  "front"                                   {\s -> TokenDir s}
+  "left"                                    {\s -> TokenLeft}
+  "right"                                   {\s -> TokenRight}
+  "front"                                   {\s -> TokenFront}
   "go"                                      {\s -> TokenGo }
   "take"                                    {\s -> TokenTake}
   "mark"                                    {\s -> TokenMark}
   "nothing"                                 {\s -> TokenNothing_}
   "turn"                                    {\s -> TokenTurn}
-  ";"                                       {\s -> TokenNextC}
-  [\.\,]                                    { \s -> TokenSym (head s) }
-  $beta [$alpha]+                           { \s -> TokenPattern s} 
-  \_                                        { \s -> TokenPattern "_"}
+  \;                                        {\s -> TokenNextC}
+  \.                                        { \s -> TokenPeriod }
+  \,                                        { \s -> TokenComma }
+  "Empty"                                   { \s -> TokenEmptyPat}
+  "Lambda"                                  { \s -> TokenLambdaPat}
+  "Debris"                                  { \s -> TokenDebrisPat}
+  "Asteroid"                                { \s -> TokenAsteroidPat}
+  "Boundary"                                { \s -> TokenBoundaryPat} 
+  \_                                        { \s -> TokenUnderscorePat}
   [$alpha $beta $digit $plusorminus]+       { \s -> TokenFunc s } 
 
 

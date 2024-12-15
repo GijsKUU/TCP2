@@ -13,8 +13,8 @@ import Model
   case      { TokenCase }
   of        { TokenOf }
   end       { TokenEnd }
-  ','       { TokenSym ','}
-  '.'       { TokenSym '.'}
+  ','       { TokenComma}
+  '.'       { TokenPeriod}
   '->'      { TokenSymArrow }
   go        { TokenGo }
   take      { TokenTake }
@@ -22,15 +22,15 @@ import Model
   nothing   { TokenNothing_ }
   turn      { TokenTurn }
   ';'       { TokenNextC }
-  Empty     { TokenPattern $$ }
-  Lambda    { TokenPattern $$ }
-  Debris    { TokenPattern $$ }
-  Asteroid  { TokenPattern $$ }
-  Boundary  { TokenPattern $$ }
-  '_'       { TokenPattern $$ }
-  left      { TokenDir $$ }
-  right     { TokenDir $$ }
-  front     { TokenDir $$ }
+  Empty     { TokenEmptyPat }
+  Lambda    { TokenLambdaPat }
+  Debris    { TokenDebrisPat }
+  Asteroid  { TokenAsteroidPat }
+  Boundary  { TokenBoundaryPat }
+  '_'       { TokenUnderscorePat }
+  left      { TokenLeft }
+  right     { TokenRight }
+  front     { TokenFront }
   func      { TokenFunc $$ }
 
 %%
