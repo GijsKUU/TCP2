@@ -46,7 +46,7 @@ allChecksPass :: ProgramInfo -> Bool
 allChecksPass info =
     hasStart info &&
     not (hasDuplicates info) &&
-    --Set.isSubsetOf (calledRules info) (definedRules info) && --(Not Working??)
+    Set.isSubsetOf (calledRules info) (definedRules info) &&
     noPatMatchFail info
 
 
@@ -54,16 +54,22 @@ checkAlgebra :: Algebra ProgramInfo --Program
                         (ProgramInfo -> ProgramInfo) --Rule
                         (ProgramInfo -> ProgramInfo) --Cmd
 checkAlgebra = Algebra {
-    prF = programCheck initialState,
-    rF = \f commands -> ruleCheck f, 
+    prF = programCheck . foldl(\ac c -> c ac) initialState,
+    rF = \f commands info -> ruleCheck f info, 
     cF = id
 }
 
-programCheck :: ProgramInfo -> [ProgramInfo -> ProgramInfo] -> ProgramInfo
+programCheck :: ProgramInfo -> ProgramInfo
 programCheck = undefined
 
 ruleCheck :: Func -> ProgramInfo -> ProgramInfo
-ruleCheck = undefined
+ruleCheck f@(Func str) info = ProgramInfo {definedRules = newRules, hasDuplicates = unique, hasStart = hasstart}
+            where newRules = Set.insert f (definedRules info)
+                  unique = Set.member f (definedRules info) || hasDuplicates info
+                  hasstart = str == "start" || hasStart info
+
+
+
 
 
 
