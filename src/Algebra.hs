@@ -63,7 +63,7 @@ programCheck :: ProgramInfo -> ProgramInfo
 programCheck = undefined
 
 ruleCheck :: Func -> ProgramInfo -> ProgramInfo
-ruleCheck f@(Func str) info = ProgramInfo {definedRules = newRules, hasDuplicates = unique, hasStart = hasstart}
+ruleCheck f@(Functype str) info = ProgramInfo {definedRules = newRules, hasDuplicates = unique, hasStart = hasstart}
             where newRules = Set.insert f (definedRules info)
                   unique = Set.member f (definedRules info) || hasDuplicates info
                   hasstart = str == "start" || hasStart info

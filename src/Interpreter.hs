@@ -14,7 +14,7 @@ import Model
 import Algebra
 
 
-data Contents  =  Empty | Lambda | Debris | Asteroid | Boundary
+data Contents  =  Empty | Lambda | Debris | Asteroid | Boundary deriving (Eq, Ord)
 
 type Size      =  Int
 type Pos       =  (Int, Int)
@@ -31,8 +31,7 @@ parseSpace = do
     css      <- replicateM (mr + 1) (replicateM (mc + 1) contents)
     -- convert from a list of lists to a finite map representation
     return $ L.fromList $ concat $
-            zipWith (\r cs ->
-              zipWith (\c d -> ((r, c), d)) [0..] cs) [0..] css
+            zipWith (\r cs -> zipWith (\c d -> ((r, c), d)) [0..] cs) [0..] css
   where
     spaces :: Parser Char String
     spaces = greedy (satisfy isSpace)
@@ -53,8 +52,23 @@ contentsTable =  [ (Empty   , '.' )
 
 -- Exercise 7
 printSpace :: Space -> String
-printSpace = undefined
+printSpace space = do
+        let (rows, columns) = L.foldrWithKey (\(keyr, keyc) value (mr, mc) -> (max keyr mr, max keyc mc)) (0,0) space
+            rcString = '(' : show rows ++ ',' : show columns ++ ")\n"
+            rowList = [0..rows]
+            columnList = [0..columns]
+            restString = printField space (rowList, columnList) columnList
 
+        rcString ++ restString
+
+printField :: Space -> ([Int], [Int]) -> [Int]-> String -- ([0..rows], [0..columns]) [0..columns]
+printField space ([],[]) css = []
+printField space ((r:rs), []) css = "\n" ++ printField space (rs, css) css
+printField space ((r:rs),(c:cs)) css = getContent (space L.! (r,c)) contentsTable : printField space (r:rs,cs) css
+
+getContent :: Contents -> [(Contents, Char)] -> Char
+getContent content (c:cs) | content == fst c = snd c
+                          | otherwise = getContent content cs
 
 -- These three should be defined by you
 type Ident = ()

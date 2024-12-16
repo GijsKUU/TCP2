@@ -39,7 +39,7 @@ data Program = Program [Rule] deriving Show
 
 data Rule = Rule Func [Cmd] deriving Show
 
-newtype Func = Func String deriving (Eq, Ord, Show)
+newtype Func = Functype String deriving (Eq, Ord, Show)
 
 newtype SymArrow = ArrowType Token deriving Show
 
