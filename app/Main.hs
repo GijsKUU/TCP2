@@ -1,3 +1,4 @@
+-- This assignment was made by Gijs Koppenberg (0779342) and Jason van Otterlo (...)
 module Main where
 
 import Algebra
@@ -6,6 +7,7 @@ import Interpreter
 import Lexer
 import Parser
 import ParseLib
+
 
 -- Exercise 11
 interactive :: Environment -> ArrowState -> IO ()
@@ -55,20 +57,12 @@ testSpacePrint = do
 -- Validation function to check all conditions
 validateProgram :: Program -> IO ()
 validateProgram prog@(Program rules) = do
-  putStrLn "=== Rule Names ==="
-  mapM_ putStrLn (map (\(Rule (Functype name) _) -> name) rules)
+
   
-  putStrLn "\n=== Called Rules ==="
-  --let calledRules = getAllCalledRules rules
-  --mapM_ putStrLn calledRules
-  
-  putStrLn "\n=== Validation Results ==="
+  putStrLn "\nValidation Results"
   putStrLn $ "Has start command? " ++ show (checkStartCmd rules)
   putStrLn $ "Are all rule calls valid? " ++ show (checkRuleCalls rules)
   putStrLn $ "Program has no duplicate rule definitions? " ++ show (checkDoubleDefined rules)
   putStrLn $ "Are all patterns matched? " ++ show (checkPatMatches rules)
   putStrLn $ "So is this program valid? " ++ show (checkProgram prog)
 
--- Helper to extract the list of rules from a program
-getRules :: Program -> [Rule]
-getRules (Program rules) = rules

@@ -85,6 +85,10 @@ foldPat (empty, lambda, debris, asteroid, boundary, underscore) pat =
 -- Exercise 6
 
 -- main function to call to check program validity
+check :: Program -> Bool
+check program = checkProgram program
+
+
 checkProgram :: Program -> Bool
 checkProgram (Program rules) = 
     checkStartCmd  rules && 

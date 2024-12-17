@@ -71,10 +71,12 @@ getContent content (c:cs) | content == fst c = snd c
                           | otherwise = getContent content cs
  
 -- These three should be defined by you
-type Ident = ()
-type Commands = ()
-type Heading = ()
+type Ident = String -- I think Ident is a rule name
+type Commands = [Cmd]   -- and commands is just a list of commands again 
+type Heading = Heads -- which way are we currently headed
  
+data Heads = North | East | South | West
+
 type Environment = Map Ident Commands
  
 type Stack       =  Commands
@@ -86,7 +88,13 @@ data Step =  Done  Space Pos Heading
  
 -- | Exercise 8
 toEnvironment :: String -> Environment
-toEnvironment = undefined
+toEnvironment input = do
+  let tokens = alexScanTokens input
+  let parsed = parser tokens
+  let rules = L.fromList [(name, cmds) | (Rule (Functype name) cmds) <- parsed]
+  if check (Program parsed) then rules else L.fromList []
+    
+
  
 -- | Exercise 9
 step :: Environment -> ArrowState -> Step
