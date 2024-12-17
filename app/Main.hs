@@ -44,7 +44,7 @@ main = do
   -- Validate the parsed program using the checks
   putStrLn "Validation results:"
   validateProgram (Program arr)
-  -- testSpacePrint
+  testSpacePrint
 
 testSpacePrint :: IO ()
 testSpacePrint = do
