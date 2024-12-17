@@ -1,4 +1,4 @@
-star       -> turn right, go, turn left, firstArg.
+start       -> turn right, go, turn left, firstArg.
 
 turnAround  -> turn right, turn right.
 
@@ -14,7 +14,6 @@ firstArg    -> case left of
                end.
 
 secondArg   -> case left of
-                 Lambda  ->  go, secondArg, mark, go;
                  _       ->  turnAround, return, turn left, go, turn left
                end.
 

@@ -3,6 +3,7 @@ module Algebra where
 import Model
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Debug.Trace
 
 
 
@@ -26,56 +27,93 @@ fold (Algebra mapPr mapR mapC) = foldProgram
 
 -- Exercise 6
 
+-- main function to call to check program validity
+check :: Program -> Bool
+check program = checkProgram program
+
+
 checkProgram :: Program -> Bool
-checkProgram program = allChecksPass state
-        where state = fold checkAlgebra program
+checkProgram (Program rules) = 
+    checkStartCmd  rules && 
+    checkRuleCalls rules &&
+    checkDoubleDefined  rules && 
+    checkPatMatches rules  
 
 
-data ProgramInfo = ProgramInfo {
-    definedRules :: Set Func,   -- set of all defined rules
-    calledRules :: Set Func,    -- set of all called rules 
-    hasStart :: Bool,           -- has a start rule or not
-    hasDuplicates :: Bool,      -- has duplicate rules
-    noPatMatchFail :: Bool      -- no pattern matches can fail
-} deriving Show 
+-- (1) check if the program has a start command
 
-initialState :: ProgramInfo
-initialState = ProgramInfo Set.empty Set.empty False False True
-
-allChecksPass :: ProgramInfo -> Bool
-allChecksPass info =
-    hasStart info &&
-    not (hasDuplicates info) &&
-    Set.isSubsetOf (calledRules info) (definedRules info) &&
-    noPatMatchFail info
-
-
-checkAlgebra :: Algebra ProgramInfo --Program
-                        (ProgramInfo -> ProgramInfo) --Rule
-                        (ProgramInfo -> ProgramInfo) --Cmd
-checkAlgebra = Algebra {
-    prF = programCheck . foldl(\ac c -> c ac) initialState,
-    rF = \f commands info -> ruleCheck f info, 
-    cF = id
-}
-
-programCheck :: ProgramInfo -> ProgramInfo
-programCheck = undefined
-
-ruleCheck :: Func -> ProgramInfo -> ProgramInfo
-ruleCheck f@(Functype str) info = ProgramInfo {definedRules = newRules, hasDuplicates = unique, hasStart = hasstart}
-            where newRules = Set.insert f (definedRules info)
-                  unique = Set.member f (definedRules info) || hasDuplicates info
-                  hasstart = str == "start" || hasStart info
+-- Check if it has start command by folding over program
+checkStartCmd :: ProgramAlgebra Bool
+checkStartCmd rules = foldProgram (\rules -> any (\(Rule (Functype name) _) -> name == "start") rules) (Program rules)
 
 
 
+-- (2) check if all calles to rules are made to rules that actually exist
+checkRuleCalls :: ProgramAlgebra Bool
+checkRuleCalls rules = 
+    let ruleNames = foldProgram (map (\(Rule (Functype name) _) -> name)) (Program rules) -- extracting all rule names
+        calledRules = foldProgram (concatMap (\(Rule _ cmds ) -> returnRuleCall cmds)) (Program rules)
+    in Set.isSubsetOf (Set.fromList calledRules) (Set.fromList ruleNames)
+
+
+-- checks whether command is a call to a function, or rule
+returnRuleCall :: [Cmd] -> [String]
+returnRuleCall [] = []
+returnRuleCall (cmd:xs) = 
+    case cmd of
+        FuncCmd (Functype name) -> name : returnRuleCall xs ++ returnRuleCallNested cmd
+        CaseOfCmd _ alts -> 
+            returnRuleCallAlts alts ++ returnRuleCall xs
+        _ -> returnRuleCall xs
+
+-- since the parser returns nested inputs, some of the rule calls are in an Alt
+returnRuleCallAlts :: [Alt] -> [String]
+returnRuleCallAlts [] = []
+returnRuleCallAlts (Alt _ cmds:xs) = returnRuleCall cmds ++ returnRuleCallAlts xs
+
+-- checking a nested Case of command to check if they contain rule calls
+returnRuleCallNested :: Cmd -> [String]
+returnRuleCallNested cmd = 
+    case cmd of
+        CaseOfCmd _ alts -> returnRuleCallAlts alts
+        _ -> []
+
+getAllRuleNames :: ProgramAlgebra [String]
+getAllRuleNames rules = map (\(Rule (Functype name) _) -> name) rules
+
+
+
+-- (3) check if all rules are defined exactly ones
+checkDoubleDefined :: ProgramAlgebra Bool -- if the size of the union of itself is the same size as the normal set there is no double values
+checkDoubleDefined rules = Set.size setrules == length rulesList
+    where
+        setrules = Set.fromList (getAllRuleNames rules)
+        rulesList = getAllRuleNames rules
 
 
 
 
 
 
+-- (4) no ability to pattern match failure
+
+-- fold over rules to see if any has an error in the pattern matching
+checkPatMatches :: [Rule] -> Bool
+checkPatMatches [] = True
+checkPatMatches ((Rule func cmds) : xs) = noPatMatchFail cmds && checkPatMatches xs
+
+noPatMatchFail :: [Cmd] -> Bool
+noPatMatchFail [] = True
+noPatMatchFail ((CaseOfCmd d a) : xs) = allPatsMatched (CaseOfCmd d a) && noPatMatchFail xs
+noPatMatchFail (_ : xs) = True && noPatMatchFail xs
+
+
+
+allPatsMatched :: Cmd -> Bool
+allPatsMatched (CaseOfCmd dir alts) = needed == pats || Set.member UnderscorePat pats
+    where
+        needed = Set.fromList ([EmptyPat, LambdaPat, DebrisPat, AsteroidPat, BoundaryPat, UnderscorePat])
+        pats = Set.fromList (getPatFromAlts alts)
 
 
 
