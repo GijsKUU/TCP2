@@ -12,10 +12,9 @@ import Lexer
 import Parser
 import Model
 import Algebra
- 
- 
+
 data Contents  =  Empty | Lambda | Debris | Asteroid | Boundary deriving (Eq, Ord)
- 
+
 type Size      =  Int
 type Pos       =  (Int, Int)
 type Space     =  Map Pos Contents
@@ -58,18 +57,19 @@ printSpace space = do
             rowList = [0..rows]
             columnList = [0..columns]
             restString = printField space (rowList, columnList) columnList
- 
+
         rcString ++ restString
- 
+
+
 printField :: Space -> ([Int], [Int]) -> [Int]-> String -- ([0..rows], [0..columns]) [0..columns]
 printField space ([],[]) css = []
 printField space ((r:rs), []) css = "\n" ++ printField space (rs, css) css
 printField space ((r:rs),(c:cs)) css = getContent (space L.! (r,c)) contentsTable : printField space (r:rs,cs) css
- 
+
 getContent :: Contents -> [(Contents, Char)] -> Char
 getContent content (c:cs) | content == fst c = snd c
                           | otherwise = getContent content cs
- 
+
 -- These three should be defined by you
 type Ident = String -- I think Ident is a rule name
 type Commands = [Cmd]   -- and commands is just a list of commands again 

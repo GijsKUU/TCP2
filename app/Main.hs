@@ -21,6 +21,7 @@ batch = undefined
 -- and write a new main function.
 main :: IO ()
 main = do
+
   chars <- readFile "examples/Test.arrow"
   --putStrLn "Input program:"
   --putStrLn ""
@@ -30,6 +31,7 @@ main = do
   --putStrLn "Tokens - test 1 :"
   --putStrLn ""
   --print tokens
+
   let tokens = alexScanTokens chars
   --putStrLn "Tokens:"
   --putStrLn ""
@@ -43,8 +45,7 @@ main = do
   putStrLn "Validation results:"
   validateProgram (Program arr)
   -- testSpacePrint
- 
- 
+
 testSpacePrint :: IO ()
 testSpacePrint = do
   spaceString <- readFile "examples/AddInput.space"
@@ -53,11 +54,10 @@ testSpacePrint = do
   putStrLn (printSpace space2)
 
 
-
 -- Validation function to check all conditions
+
 validateProgram :: Program -> IO ()
 validateProgram prog@(Program rules) = do
-
   
   putStrLn "\nValidation Results"
   putStrLn $ "Has start command? " ++ show (checkStartCmd rules)
@@ -65,4 +65,5 @@ validateProgram prog@(Program rules) = do
   putStrLn $ "Program has no duplicate rule definitions? " ++ show (checkDoubleDefined rules)
   putStrLn $ "Are all patterns matched? " ++ show (checkPatMatches rules)
   putStrLn $ "So is this program valid? " ++ show (checkProgram prog)
+
 

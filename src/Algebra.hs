@@ -7,80 +7,23 @@ import Debug.Trace
 
 
 
-
 -- Exercise 5
 
-type ProgramAlgebra r = ([Rule] -> r)
+-- pr :: Program, r :: Rule, c :: Cmd
+data Algebra pr r c = Algebra {
+    prF :: [r] -> pr, -- Program
+    rF :: Func -> [c] -> r, -- Rule
+    cF :: c} -- Cmd
 
-type RuleAlgebra r1 r2 = (Func -> [Cmd] -> r2)
-
-type FuncAlgebra r = (String -> r)
-
-type CmdAlgebra r1 r2 r3 r4 r5 r6 r7 = (
-    r1,                   -- GoCmd
-    r1,                   -- TakeCmd
-    r1,                   -- MarkCmd
-    r1,                   -- NothingCmd
-    Dir -> r1,            -- TurnCmd
-    Dir -> [Alt] -> r1,   -- CaseOfCmd
-    Func -> r1            -- FuncCmd
-    )
-
-type DirAlgebra r = (r, r, r)  -- left right front
-
-type AltAlgebra r1 r2 = (Pat -> [Cmd] -> r2)
-
-type PatAlgebra r = (
-    r,  -- empty
-    r,  -- lambda
-    r,  -- debris
-    r,  -- asteroid
-    r,  -- boundary
-    r   -- underscore
-    )
-
-
-foldProgram :: ProgramAlgebra r -> Program -> r
-foldProgram f (Program rules) = f rules
-
-foldRule :: RuleAlgebra r1 r2 -> Rule -> r2
-foldRule f (Rule func cmds) = f func cmds
-
-foldFunc :: FuncAlgebra r -> Func -> r
-foldFunc f (Functype str) = f str
-
-foldCmd :: CmdAlgebra r1 r2 r3 r4 r5 r6 r7 -> Cmd -> r1
-foldCmd (go, take, mark, nothing, turn, caseof, func) cmd = 
-    case cmd of
-        GoCmd -> go
-        TakeCmd -> take
-        MarkCmd -> mark
-        NothingCmd -> nothing
-        TurnCmd dir -> turn dir
-        CaseOfCmd dir alts -> caseof dir alts
-        FuncCmd f -> func f
-
-foldDir :: DirAlgebra r -> Dir -> r
-foldDir (left, right, front) dir =
-    case dir of
-        DirLeft -> left
-        DirRight -> right
-        DirFront -> front
-
-foldAlt :: AltAlgebra r1 r2 -> Alt -> r2
-foldAlt f (Alt pat cmds) = f pat cmds
-
-foldPat :: PatAlgebra r -> Pat -> r
-foldPat (empty, lambda, debris, asteroid, boundary, underscore) pat =
-    case pat of
-        EmptyPat -> empty
-        LambdaPat -> lambda
-        DebrisPat -> debris
-        AsteroidPat -> asteroid
-        BoundaryPat -> boundary
-        UnderscorePat -> underscore
-
-
+fold :: Algebra pr r c -> Program -> pr
+fold (Algebra mapPr mapR mapC) = foldProgram
+    where
+        foldProgram (Program rules) = mapPr (map foldRule rules)
+        -- map the foldRule on the [Rule]('rules') in Program
+        foldRule (Rule func cmds) = mapR func (map foldCmd cmds)
+        -- map foldCmd on the commands in Rule
+        foldCmd _ = mapC 
+        -- do mapC
 
 -- Exercise 6
 
@@ -172,17 +115,5 @@ allPatsMatched (CaseOfCmd dir alts) = needed == pats || Set.member UnderscorePat
         needed = Set.fromList ([EmptyPat, LambdaPat, DebrisPat, AsteroidPat, BoundaryPat, UnderscorePat])
         pats = Set.fromList (getPatFromAlts alts)
 
-    
-getPatFromAlts :: [Alt] -> [Pat]
-getPatFromAlts alts = map (\(Alt pat _) -> pat) alts
-
-
-
-
-
-
-
-
-        
 
 
