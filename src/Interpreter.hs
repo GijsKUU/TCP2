@@ -13,7 +13,7 @@ import Parser
 import Model
 import Algebra
 
-data Contents  =  Empty | Lambda | Debris | Asteroid | Boundary deriving (Eq, Ord)
+data Contents  =  Empty | Lambda | Debris | Asteroid | Boundary deriving (Eq, Ord, Show)
 
 type Size      =  Int
 type Pos       =  (Int, Int)
@@ -134,7 +134,7 @@ makeTurn h DirFront     = h
 sensorRead :: ArrowState -> Step
 sensorRead (ArrowState s p h (CaseOfCmd d as:cs)) = case iterateAlts scanRes as of 
                                                       Just cmds -> Ok (ArrowState s p h (cmds++cs))
-                                                      Nothing -> Fail "No Alternative matches found on CaseCmd"
+                                                      Nothing -> Fail ("No Alternative matches found on pattern: " ++ show scanRes)
                                                     where scanRes = scan s p (makeTurn h d)
 
 scan :: Space -> Pos -> Heading -> Contents
@@ -162,10 +162,10 @@ patToContents BoundaryPat = Boundary
 
 --FuncCmd
 ruleCall :: ArrowState -> Environment -> Step
-ruleCall (ArrowState s p h (FuncCmd f:cs)) env = case getCmds env f of
+ruleCall (ArrowState s p h (FuncCmd f@(Functype str):cs)) env = case getCmds env f of
                                                     Just cmds -> Ok (ArrowState s p h (cmds++cs))
-                                                    Nothing -> Fail "Rule in rulecall not defined"
+                                                    Nothing -> Fail ("Rule in rulecall not defined: " ++ str)
 
 getCmds :: Environment -> Func -> Maybe [Cmd]
-getCmds env f | not (L.member (show f) env) = Nothing
-              | otherwise = Just (env L.! show f)
+getCmds env (Functype str) | not (L.member str env) = Nothing
+                           | otherwise = Just (env L.! str)
