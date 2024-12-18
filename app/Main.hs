@@ -8,6 +8,8 @@ import Lexer
 import Parser
 import ParseLib
 
+import Data.Map (Map)
+import qualified Data.Map as L
 
 -- Exercise 11
 interactive :: Environment -> ArrowState -> IO ()
@@ -45,6 +47,8 @@ main = do
   putStrLn "Validation results:"
   validateProgram (Program arr)
   testSpacePrint
+  testStep
+
 
 testSpacePrint :: IO ()
 testSpacePrint = do
@@ -53,12 +57,30 @@ testSpacePrint = do
   let space2 =head ( map fst space)
   putStrLn (printSpace space2)
 
+testStep :: IO ()
+testStep = do
+  spaceString <- readFile "examples/Maze.space"
+  let space = parse parseSpace spaceString
+  let space2 =head ( map fst space)
+  putStrLn (printSpace space2)
+  script <- readFile "examples/Find.arrow"
+  let solver = toEnvironment script
+  let arrowstate = ArrowState space2 (0,0) South (solver L.! "start")
+  putStrLn (solveMaze solver arrowstate)
+
+solveMaze :: Environment -> ArrowState -> String
+solveMaze env a = case s of
+                      Ok newa -> solveMaze env newa
+                      Done s p h -> printSpace s
+                      Fail s -> s
+                  where s = step env a
+
 
 -- Validation function to check all conditions
 
 validateProgram :: Program -> IO ()
 validateProgram prog@(Program rules) = do
-  
+
   putStrLn "\nValidation Results"
   putStrLn $ "Has start command? " ++ show (checkStartCmd rules)
   putStrLn $ "Are all rule calls valid? " ++ show (checkRuleCalls rules)

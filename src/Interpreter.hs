@@ -62,7 +62,7 @@ printSpace space = do
 
 
 printField :: Space -> ([Int], [Int]) -> [Int]-> String -- ([0..rows], [0..columns]) [0..columns]
-printField space ([],[]) css = []
+printField space ([],_) css = []
 printField space ((r:rs), []) css = "\n" ++ printField space (rs, css) css
 printField space ((r:rs),(c:cs)) css = getContent (space L.! (r,c)) contentsTable : printField space (r:rs,cs) css
 
@@ -85,7 +85,7 @@ data ArrowState  =  ArrowState Space Pos Heading Stack
 data Step =  Done  Space Pos Heading
           |  Ok    ArrowState
           |  Fail  String
- 
+
 -- | Exercise 8
 toEnvironment :: String -> Environment
 toEnvironment input = do
@@ -98,4 +98,74 @@ toEnvironment input = do
  
 -- | Exercise 9
 step :: Environment -> ArrowState -> Step
-step = undefined
+step env (ArrowState s p h []) = Done s p h
+step env (ArrowState s p h (GoCmd:cs)) = Ok (ArrowState s (moveForward h p s) h cs)
+step env (ArrowState s p h (TakeCmd:cs)) = let space = L.insert p Empty s in Ok (ArrowState space p h cs)
+step env (ArrowState s p h (MarkCmd:cs)) = let space = L.insert p Lambda s in Ok (ArrowState space p h cs)
+step env (ArrowState s p h (NothingCmd:cs)) = Ok (ArrowState s p h cs)
+step env (ArrowState s p h (TurnCmd d:cs)) = Ok (ArrowState s p (makeTurn h d) cs)
+step env a@(ArrowState s p h (CaseOfCmd d as:cs)) = sensorRead a
+step env a@(ArrowState s p h (FuncCmd f:cs)) = ruleCall a env
+
+--GoCmd
+moveForward :: Heading -> Pos -> Space -> Pos
+moveForward North (y, x) s | not (L.member (y-1, x) s) || s L.! (y-1, x) == Asteroid || s L.! (y-1, x) == Boundary = (y, x) 
+                           | otherwise = (y-1, x)
+moveForward East (y, x) s  | not (L.member (y, x+1) s) || s L.! (y, x+1) == Asteroid || s L.! (y, x+1) == Boundary = (y, x) 
+                           | otherwise = (y, x+1)
+moveForward South (y, x) s | not (L.member (y+1, x) s) || s L.! (y+1, x) == Asteroid || s L.! (y+1, x) == Boundary = (y, x) 
+                           | otherwise = (y+1, x)
+moveForward West (y, x) s  | not (L.member (y, x-1) s) || s L.! (y, x-1) == Asteroid || s L.! (y, x-1) == Boundary = (y, x) 
+                           | otherwise = (y, x-1)
+
+--TakeCmd
+makeTurn :: Heading -> Dir -> Heading
+makeTurn North DirRight = East
+makeTurn North DirLeft  = West
+makeTurn East DirRight  = South
+makeTurn East DirLeft   = North
+makeTurn South DirRight = West
+makeTurn South DirLeft  = East
+makeTurn West DirRight  = North
+makeTurn West DirLeft   = South
+makeTurn h DirFront     = h
+
+--CaseOfCmd
+sensorRead :: ArrowState -> Step
+sensorRead (ArrowState s p h (CaseOfCmd d as:cs)) = case iterateAlts scanRes as of 
+                                                      Just cmds -> Ok (ArrowState s p h (cmds++cs))
+                                                      Nothing -> Fail "No Alternative matches found on CaseCmd"
+                                                    where scanRes = scan s p (makeTurn h d)
+
+scan :: Space -> Pos -> Heading -> Contents
+scan s (y, x) North | not (L.member (y-1, x) s) = Boundary
+                    | otherwise = s L.! (y-1, x)
+scan s (y, x) East  | not (L.member (y, x+1) s) = Boundary
+                    | otherwise = s L.! (y, x+1)
+scan s (y, x) South | not (L.member (y+1, x) s) = Boundary
+                    | otherwise = s L.! (y+1, x)
+scan s (y, x) West  | not (L.member (y, x-1) s) = Boundary
+                    | otherwise = s L.! (y, x-1)
+
+iterateAlts :: Contents -> [Alt] -> Maybe [Cmd]
+iterateAlts c [] = Nothing
+iterateAlts c (Alt pat cs:as) | pat == UnderscorePat = iterateAlts c as
+                              | c == patToContents pat = Just cs
+                              | otherwise = iterateAlts c as
+
+patToContents :: Pat -> Contents
+patToContents EmptyPat = Empty
+patToContents LambdaPat = Lambda
+patToContents DebrisPat = Debris
+patToContents AsteroidPat = Asteroid
+patToContents BoundaryPat = Boundary
+
+--FuncCmd
+ruleCall :: ArrowState -> Environment -> Step
+ruleCall (ArrowState s p h (FuncCmd f:cs)) env = case getCmds env f of
+                                                    Just cmds -> Ok (ArrowState s p h (cmds++cs))
+                                                    Nothing -> Fail "Rule in rulecall not defined"
+
+getCmds :: Environment -> Func -> Maybe [Cmd]
+getCmds env f | not (L.member (show f) env) = Nothing
+              | otherwise = Just (env L.! show f)

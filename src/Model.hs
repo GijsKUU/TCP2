@@ -51,11 +51,11 @@ data Cmd
     | TurnCmd Dir
     | CaseOfCmd Dir [Alt]
     | FuncCmd Func
-    deriving Show
+    deriving (Eq, Show)
 
-data Dir = DirLeft | DirRight | DirFront deriving Show
+data Dir = DirLeft | DirRight | DirFront deriving (Eq, Show)
 
-data Alt = Alt Pat [Cmd] deriving Show
+data Alt = Alt Pat [Cmd] deriving (Eq, Show)
 
 data Pat
     = EmptyPat
