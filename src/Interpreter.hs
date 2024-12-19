@@ -4,6 +4,8 @@ import ParseLib
  
 import Data.Map (Map)
 import qualified Data.Map as L
+
+import Debug.Trace (trace)
  
 import Data.Char (isSpace)
 import Control.Monad (replicateM)
@@ -60,7 +62,6 @@ printSpace space = do
 
         rcString ++ restString
 
-
 printField :: Space -> ([Int], [Int]) -> [Int]-> String -- ([0..rows], [0..columns]) [0..columns]
 printField space ([],_) css = []
 printField space ((r:rs), []) css = "\n" ++ printField space (rs, css) css
@@ -75,7 +76,7 @@ type Ident = String -- I think Ident is a rule name
 type Commands = [Cmd]   -- and commands is just a list of commands again 
 type Heading = Heads -- which way are we currently headed
  
-data Heads = North | East | South | West
+data Heads = North | East | South | West deriving Show
 
 type Environment = Map Ident Commands
  
@@ -118,7 +119,7 @@ moveForward South (y, x) s | not (L.member (y+1, x) s) || s L.! (y+1, x) == Aste
 moveForward West (y, x) s  | not (L.member (y, x-1) s) || s L.! (y, x-1) == Asteroid || s L.! (y, x-1) == Boundary = (y, x) 
                            | otherwise = (y, x-1)
 
---TakeCmd
+-- turning, hardcoded
 makeTurn :: Heading -> Dir -> Heading
 makeTurn North DirRight = East
 makeTurn North DirLeft  = West
@@ -152,7 +153,7 @@ iterateAlts c [] = Nothing
 iterateAlts c (Alt pat cs:as) | pat == UnderscorePat = iterateAlts c as
                               | c == patToContents pat = Just cs
                               | otherwise = iterateAlts c as
-
+                              
 patToContents :: Pat -> Contents
 patToContents EmptyPat = Empty
 patToContents LambdaPat = Lambda

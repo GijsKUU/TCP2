@@ -13,10 +13,55 @@ import qualified Data.Map as L
 
 -- Exercise 11
 interactive :: Environment -> ArrowState -> IO ()
+interactive env state = do
+    putStrLn "Current State:"
+    putStrLn $ printSpace (getSpace state)
+    putStrLn $ "Position: " ++ show (getPos state)
+    putStrLn $ "Heading: " ++ show (getHeading state)
+    putStrLn $ "Stack: " ++ show (getStack state)
+    putStrLn "Press Enter to continue..."
+    _ <- getLine
+    
+    case step env state of
+        Done finalSpace finalPos finalHeading -> do
+            putStrLn "Program completed successfully!"
+            putStrLn $ printSpace finalSpace
+            putStrLn $ "Final Position: " ++ show finalPos
+            putStrLn $ "Final Heading: " ++ show finalHeading
+        
+        Ok nextState -> do
+            interactive env nextState
+        
+        Fail errorMsg -> do
+            putStrLn $ "Program failed: " ++ errorMsg
+  where
+    getSpace (ArrowState s _ _ _) = s
+    getPos (ArrowState _ p _ _) = p
+    getHeading (ArrowState _ _ h _) = h
+    getStack (ArrowState _ _ _ s) = s
+
+batch :: Environment -> ArrowState -> (Space, Pos, Heading)
+batch env state = 
+    case step env state of
+        Done finalSpace finalPos finalHeading -> 
+            (finalSpace, finalPos, finalHeading)
+        
+        Ok nextState -> 
+            batch env nextState
+        
+        Fail errorMsg -> do
+            let (ArrowState finalSpace finalPos finalHeading _) = state
+            (finalSpace, finalPos, finalHeading)
+
+
+{-
+interactive :: Environment -> ArrowState -> IO ()
 interactive = undefined
 
 batch :: Environment -> ArrowState -> (Space, Pos, Heading)
 batch = undefined
+
+-}
 
 -- This function is just here to play around with and test your lexer/parser.
 -- When implementing exercise 11, delete this comment and this function,
@@ -24,7 +69,7 @@ batch = undefined
 main :: IO ()
 main = do
 
-  chars <- readFile "examples/Test.arrow"
+  --chars <- readFile "examples/Test.arrow"
   --putStrLn "Input program:"
   --putStrLn ""
   --putStrLn chars
@@ -34,20 +79,42 @@ main = do
   --putStrLn ""
   --print tokens
 
-  let tokens = alexScanTokens chars
+  --let tokens = alexScanTokens chars
   --putStrLn "Tokens:"
   --putStrLn ""
   --print tokens
-  let arr = parser tokens
+  --let arr = parser tokens
   --putStrLn "Parsed program:"
   --putStrLn ""
-  print arr
+  --print arr
 
   -- Validate the parsed program using the checks
-  putStrLn "Validation results:"
-  validateProgram (Program arr)
-  testSpacePrint
-  testStep
+  --putStrLn "Validation results:"
+  --validateProgram (Program arr)
+  --testSpacePrint
+  --testStep
+
+  -- loading in script and space
+  spaceString <- readFile "examples/Maze.space"
+  script <- readFile "examples/Find.arrow"
+  
+
+  let space = head (map fst (parse parseSpace spaceString))
+  let solver = toEnvironment script
+  
+  -- run interactive mode, start at 0,0 with "start"
+  let arrowStateInteractive = ArrowState space (0,0) North (solver L.! "start")
+  putStrLn "Interactive Mode"
+  interactive solver arrowStateInteractive
+  
+  -- run batch mode
+  let arrowStateBatch = ArrowState space (0,0) South (solver L.! "start")
+  putStrLn "\nBatch Mode"
+  let (finalSpace, finalPos, finalHeading) = batch solver arrowStateBatch
+  putStrLn "Final State:"
+  putStrLn $ printSpace finalSpace
+  putStrLn $ "Final Position: " ++ show finalPos
+  putStrLn $ "Final Heading: " ++ show finalHeading
 
 
 testSpacePrint :: IO ()
@@ -59,14 +126,15 @@ testSpacePrint = do
 
 testStep :: IO ()
 testStep = do
-  spaceString <- readFile "examples/Maze.space"
+  spaceString <- readFile "examples/SampleSpace.space"
   let space = parse parseSpace spaceString
   let space2 =head ( map fst space)
   putStrLn (printSpace space2)
-  script <- readFile "examples/Find.arrow"
+  script <- readFile "examples/RemoveDebris.arrow"
   let solver = toEnvironment script
   let arrowstate = ArrowState space2 (0,0) South (solver L.! "start")
-  putStrLn (solveMaze solver arrowstate)
+  let solved = solveMaze solver arrowstate
+  putStrLn ("DONEEE")
 
 solveMaze :: Environment -> ArrowState -> String
 solveMaze env a = case s of
@@ -76,8 +144,7 @@ solveMaze env a = case s of
                   where s = step env a
 
 
--- Validation function to check all conditions
-
+-- validation function to check all conditions
 validateProgram :: Program -> IO ()
 validateProgram prog@(Program rules) = do
 
