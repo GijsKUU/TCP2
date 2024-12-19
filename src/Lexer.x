@@ -9,7 +9,6 @@ $alpha  = [a-z] -- lowercase characters
 $beta   = [A-Z] -- uppercase characters 
 $digit  = 0-9
 $plusorminus = [\+\-]
---$name   = ($alpha | $beta | $digit | $plusorminus)+ 
 
 
 tokens :-

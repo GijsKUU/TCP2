@@ -8,8 +8,6 @@ import Debug.Trace
 
 
 -- Exercise 5
-
--- pr :: Program, r :: Rule, c :: Cmd
 type ProgramAlgebra r = ([Rule] -> r)
 
 type RuleAlgebra r1 r2 = (Func -> [Cmd] -> r2)

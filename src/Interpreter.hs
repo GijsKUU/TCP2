@@ -64,7 +64,7 @@ printSpace space = do
 
 printField :: Space -> ([Int], [Int]) -> [Int]-> String -- ([0..rows], [0..columns]) [0..columns]
 printField space ([],_) css = []
-printField space ((r:rs), []) css = "\n" ++ printField space (rs, css) css
+printField space ((r:rs), []) css = "\n" ++ printField space (rs, css) css --reset [0..columns] once it has been emptied
 printField space ((r:rs),(c:cs)) css = getContent (space L.! (r,c)) contentsTable : printField space (r:rs,cs) css
 
 getContent :: Contents -> [(Contents, Char)] -> Char
@@ -133,10 +133,10 @@ makeTurn h DirFront     = h
 
 --CaseOfCmd
 sensorRead :: ArrowState -> Step
-sensorRead (ArrowState s p h (CaseOfCmd d as:cs)) = case iterateAlts scanRes as of 
+sensorRead (ArrowState s p h (CaseOfCmd d as:cs)) = case iterateAlts scanRes as of --Just cmds where cmds :: [cmd] of commands in alternative
                                                       Just cmds -> Ok (ArrowState s p h (cmds++cs))
                                                       Nothing -> Fail ("No Alternative matches found on pattern: " ++ show scanRes)
-                                                    where scanRes = scan s p (makeTurn h d)
+                                                    where scanRes = scan s p (makeTurn h d) --only makes turn for scan, doesnt influence the ArrowState
 
 scan :: Space -> Pos -> Heading -> Contents
 scan s (y, x) North | not (L.member (y-1, x) s) = Boundary
@@ -150,7 +150,7 @@ scan s (y, x) West  | not (L.member (y, x-1) s) = Boundary
 
 iterateAlts :: Contents -> [Alt] -> Maybe [Cmd]
 iterateAlts c [] = Nothing
-iterateAlts c ((Alt pat cs):as) | pat == UnderscorePat = Just cs
+iterateAlts c ((Alt pat cs):as) | pat == UnderscorePat = Just cs --UnderscorePat works as a joker and alwats succeeds
                                 | c == patToContents pat = Just cs
                                 | otherwise = iterateAlts c as
                               
@@ -160,7 +160,6 @@ patToContents LambdaPat = Lambda
 patToContents DebrisPat = Debris
 patToContents AsteroidPat = Asteroid
 patToContents BoundaryPat = Boundary
---patToContents UnderscorePat = Empty -- placeholder
 
 --FuncCmd
 ruleCall :: ArrowState -> Environment -> Step
