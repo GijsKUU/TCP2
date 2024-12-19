@@ -95,20 +95,20 @@ main = do
   --testStep
 
   -- loading in script and space
-  spaceString <- readFile "examples/Maze.space"
-  script <- readFile "examples/Find.arrow"
+  spaceString <- readFile "examples/SampleSpace.space"
+  script <- readFile "examples/RemoveDebris.arrow"
   
 
   let space = head (map fst (parse parseSpace spaceString))
   let solver = toEnvironment script
   
   -- run interactive mode, start at 0,0 with "start"
-  let arrowStateInteractive = ArrowState space (0,0) North (solver L.! "start")
+  let arrowStateInteractive = ArrowState space (0,0) East (solver L.! "start")
   putStrLn "Interactive Mode"
   interactive solver arrowStateInteractive
   
   -- run batch mode
-  let arrowStateBatch = ArrowState space (0,0) South (solver L.! "start")
+  let arrowStateBatch = ArrowState space (0,0) East (solver L.! "start")
   putStrLn "\nBatch Mode"
   let (finalSpace, finalPos, finalHeading) = batch solver arrowStateBatch
   putStrLn "Final State:"

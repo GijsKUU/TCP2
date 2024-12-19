@@ -150,9 +150,9 @@ scan s (y, x) West  | not (L.member (y, x-1) s) = Boundary
 
 iterateAlts :: Contents -> [Alt] -> Maybe [Cmd]
 iterateAlts c [] = Nothing
-iterateAlts c (Alt pat cs:as) | pat == UnderscorePat = iterateAlts c as
-                              | c == patToContents pat = Just cs
-                              | otherwise = iterateAlts c as
+iterateAlts c ((Alt pat cs):as) | pat == UnderscorePat = Just cs
+                                | c == patToContents pat = Just cs
+                                | otherwise = iterateAlts c as
                               
 patToContents :: Pat -> Contents
 patToContents EmptyPat = Empty
@@ -160,6 +160,7 @@ patToContents LambdaPat = Lambda
 patToContents DebrisPat = Debris
 patToContents AsteroidPat = Asteroid
 patToContents BoundaryPat = Boundary
+--patToContents UnderscorePat = Empty -- placeholder
 
 --FuncCmd
 ruleCall :: ArrowState -> Environment -> Step
