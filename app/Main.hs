@@ -57,8 +57,8 @@ batch env state =
 main :: IO ()
 main = do
   -- loading in script and space
-  spaceString <- readFile "examples/SampleSpace.space"
-  script <- readFile "examples/RemoveDebris.arrow"
+  spaceString <- readFile "examples/AddInput.space"
+  script <- readFile "examples/Add.arrow"
   
   let space = head (map fst (parse parseSpace spaceString))
   let solver = toEnvironment script
